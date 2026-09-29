@@ -31,7 +31,11 @@ def verify_api_key(
          chạy hết chuỗi.
       4. Hợp lệ → trả về ``x_user_id`` nếu client có gửi, ngược lại trả
          ``ANONYMOUS_USER``. user_id này là đơn vị để rate limit và tính chi phí.
-
-    Gợi ý: dùng ``status.HTTP_401_UNAUTHORIZED`` cho dễ đọc.
     """
-    raise NotImplementedError("TODO (CP3): cài đặt verify_api_key")
+    expected_key = get_settings().agent_api_key
+    if x_api_key is None or not secrets.compare_digest(x_api_key, expected_key):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="invalid or missing API key",
+        )
+    return x_user_id if x_user_id else ANONYMOUS_USER
